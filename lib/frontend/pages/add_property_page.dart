@@ -87,39 +87,56 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Property")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              _buildField("Property Name", _nameController),
-              _buildField("Address", _addressController),
-              _buildField("Rent Amount", _rentController, isNumber: true),
-              _buildField("Total Units", _unitsController, isNumber: true),
-              _buildField(
-                "Occupied Units",
-                _occupiedController,
-                isNumber: true,
-              ),
+      backgroundColor: const Color.fromARGB(255, 244, 244, 244),
+      appBar: AppBar(
+        title: const Text("Add Property"),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
+      body: Container(
+        color: const Color.fromARGB(255, 244, 244, 244),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                _buildField("Property Name", _nameController),
+                _buildField("Address", _addressController),
+                _buildField("Rent Amount", _rentController, isNumber: true),
+                _buildField("Total Units", _unitsController, isNumber: true),
+                _buildField(
+                  "Occupied Units",
+                  _occupiedController,
+                  isNumber: true,
+                ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              ElevatedButton(
-                onPressed: _isLoading ? null : _addProperty,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.5,
-                        ),
-                      )
-                    : const Text("Add"),
-              ),
-            ],
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _addProperty,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : const Text("Add"),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -138,6 +155,8 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
         keyboardType: isNumber
             ? const TextInputType.numberWithOptions(decimal: true)
             : TextInputType.text,
+        style: const TextStyle(color: Colors.black),
+        cursorColor: Colors.black,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return "Required";
@@ -146,6 +165,20 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
         },
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: const TextStyle(color: Colors.black87),
+          floatingLabelStyle: const TextStyle(color: Colors.black),
+          filled: true,
+          fillColor: Colors.white,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: Color.fromARGB(255, 210, 210, 210),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.black),
+          ),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),

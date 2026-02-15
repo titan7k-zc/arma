@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:arma2/backend/services/auth/session_service.dart';
 import 'package:arma2/backend/services/properties/property_service.dart';
+import 'package:arma2/backend/services/tenants/tenant_service.dart';
 import 'package:arma2/frontend/pages/login_page.dart';
 import 'package:arma2/frontend/pages/properties_page.dart';
+import 'package:arma2/frontend/pages/tenants_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = const [
     Center(child: Text("Home Page")),
     PropertiesPage(),
-    Center(child: Text("Tenants Page")),
+    TenantsPage(),
     Center(child: Text("Analytics Page")),
   ];
 
@@ -76,6 +78,25 @@ class _HomePageState extends State<HomePage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Properties refreshed")));
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Refresh failed: $error")));
+    }
+  }
+
+  Future<void> _refreshTenants() async {
+    try {
+      await TenantService.instance.refreshCurrentUserTenants();
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Tenants refreshed")));
     } catch (error) {
       if (!mounted) {
         return;
@@ -261,6 +282,12 @@ class _HomePageState extends State<HomePage> {
               tooltip: "Refresh properties",
               onPressed: _refreshProperties,
             ),
+          if (_selectedIndex == 2)
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: "Refresh tenants",
+              onPressed: _refreshTenants,
+            ),
           IconButton(
             icon: const Icon(Icons.notifications_none),
             onPressed: () {},
@@ -284,6 +311,7 @@ class _HomePageState extends State<HomePage> {
       body: IndexedStack(index: _selectedIndex, children: _pages),
 
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
