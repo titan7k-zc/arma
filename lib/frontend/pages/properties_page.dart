@@ -15,7 +15,7 @@ class PropertiesPage extends StatelessWidget {
     }
 
     return Container(
-      color: Colors.grey[100],
+      color: const Color.fromARGB(255, 244, 244, 244),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -27,11 +27,16 @@ class PropertiesPage extends StatelessWidget {
               children: [
                 const Text(
                   "Properties",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 22,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
+                    backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -120,6 +125,7 @@ class PropertyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.white,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 2,
@@ -138,6 +144,7 @@ class PropertyCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -148,7 +155,10 @@ class PropertyCard extends StatelessWidget {
             const SizedBox(height: 4),
 
             /// Address
-            Text(location, style: const TextStyle(color: Colors.grey)),
+            Text(
+              location,
+              style: const TextStyle(color: Color.fromARGB(255, 104, 104, 104)),
+            ),
 
             const Divider(height: 24),
 
@@ -177,7 +187,9 @@ class PropertyCard extends StatelessWidget {
           value,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isRevenue ? Colors.green : Colors.black,
+            color: isRevenue
+                ? Colors.green
+                : const Color.fromARGB(255, 0, 0, 0),
           ),
         ),
       ],
