@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:arma2/backend/models/property_model.dart';
 import 'package:arma2/backend/services/properties/property_service.dart';
 import 'package:arma2/frontend/pages/add_property_page.dart';
+import 'package:arma2/frontend/pages/property_settings_page.dart';
 
 class PropertiesPage extends StatelessWidget {
   const PropertiesPage({super.key});
@@ -89,11 +90,16 @@ class PropertiesPage extends StatelessWidget {
                     final property = properties[index];
 
                     return PropertyCard(
-                      title: property.propertyName,
-                      location: property.address,
-                      units: property.units.toString(),
-                      occupied: property.occupied.toString(),
-                      revenue: "LKR ${property.revenue.toStringAsFixed(0)}",
+                      property: property,
+                      onSettingsTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                PropertySettingsPage(property: property),
+                          ),
+                        );
+                      },
                     );
                   },
                 );
@@ -107,19 +113,13 @@ class PropertiesPage extends StatelessWidget {
 }
 
 class PropertyCard extends StatelessWidget {
-  final String title;
-  final String location;
-  final String units;
-  final String occupied;
-  final String revenue;
+  final PropertyModel property;
+  final VoidCallback onSettingsTap;
 
   const PropertyCard({
     super.key,
-    required this.title,
-    required this.location,
-    required this.units,
-    required this.occupied,
-    required this.revenue,
+    required this.property,
+    required this.onSettingsTap,
   });
 
   @override
@@ -140,7 +140,7 @@ class PropertyCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    title,
+                    property.propertyName,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -148,7 +148,11 @@ class PropertyCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Icon(Icons.chevron_right),
+                IconButton(
+                  onPressed: onSettingsTap,
+                  icon: const Icon(Icons.chevron_right, color: Colors.black),
+                  tooltip: 'Property settings',
+                ),
               ],
             ),
 
@@ -156,7 +160,7 @@ class PropertyCard extends StatelessWidget {
 
             /// Address
             Text(
-              location,
+              property.address,
               style: const TextStyle(color: Color.fromARGB(255, 104, 104, 104)),
             ),
 
@@ -166,9 +170,13 @@ class PropertyCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStat("Units", units),
-                _buildStat("Occupied", occupied),
-                _buildStat("Revenue", revenue, isRevenue: true),
+                _buildStat("Units", property.units.toString()),
+                _buildStat("Occupied", property.occupied.toString()),
+                _buildStat(
+                  "Revenue",
+                  "LKR ${property.revenue.toStringAsFixed(0)}",
+                  isRevenue: true,
+                ),
               ],
             ),
           ],

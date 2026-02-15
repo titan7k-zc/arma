@@ -101,4 +101,68 @@ class PropertyService {
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
+
+  Future<void> updateProperty({
+    required String propertyId,
+    required String propertyName,
+    required String address,
+    required double rentAmount,
+    required int units,
+    required int occupied,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'not-authenticated',
+        message: 'User not logged in.',
+      );
+    }
+
+    final cleanedName = propertyName.trim();
+    final cleanedAddress = address.trim();
+
+    if (cleanedName.isEmpty) {
+      throw ArgumentError('Property name is required.');
+    }
+    if (cleanedAddress.isEmpty) {
+      throw ArgumentError('Address is required.');
+    }
+    if (rentAmount < 0) {
+      throw ArgumentError('Rent amount cannot be negative.');
+    }
+    if (units <= 0) {
+      throw ArgumentError('Total units must be greater than 0.');
+    }
+    if (occupied < 0) {
+      throw ArgumentError('Occupied units cannot be negative.');
+    }
+    if (occupied > units) {
+      throw ArgumentError('Occupied units cannot be greater than total units.');
+    }
+
+    await _propertiesRef(user.uid).doc(propertyId).update({
+      'propertyName': cleanedName,
+      'address': cleanedAddress,
+      'rentAmount': rentAmount,
+      'units': units,
+      'occupied': occupied,
+    });
+  }
+
+  Future<void> deleteProperty({required String propertyId}) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'not-authenticated',
+        message: 'User not logged in.',
+      );
+    }
+
+    final cleanedPropertyId = propertyId.trim();
+    if (cleanedPropertyId.isEmpty) {
+      throw ArgumentError('Property id is required.');
+    }
+
+    await _propertiesRef(user.uid).doc(cleanedPropertyId).delete();
+  }
 }
