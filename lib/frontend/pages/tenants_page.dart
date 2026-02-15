@@ -166,6 +166,15 @@ class _TenantCard extends StatelessWidget {
     return initials.toUpperCase();
   }
 
+  String _formatRentLabel(double value) {
+    final rounded = value.round().toString();
+    final formatted = rounded.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+    return 'LKR $formatted/mo';
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -186,7 +195,10 @@ class _TenantCard extends StatelessWidget {
             ? 'Unknown property'
             : data.propertyName.trim();
         final unitLabel = data.unitId.trim().isEmpty ? '-' : data.unitId.trim();
-        final emailLabel = tenantEmail.isEmpty ? 'No email' : tenantEmail;
+        final unitText = unitLabel.toLowerCase().startsWith('unit')
+            ? unitLabel
+            : 'Unit $unitLabel';
+        final rentLabel = _formatRentLabel(data.rentAmount);
 
         return Card(
           margin: EdgeInsets.zero,
@@ -246,8 +258,13 @@ class _TenantCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 10),
+                const Divider(
+                  height: 1,
+                  color: Color.fromARGB(255, 226, 226, 226),
+                ),
+                const SizedBox(height: 10),
                 Text(
-                  'Unit: $unitLabel',
+                  unitText,
                   style: const TextStyle(
                     color: Color.fromARGB(255, 112, 112, 112),
                     fontSize: 13,
@@ -255,11 +272,11 @@ class _TenantCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  emailLabel,
+                  rentLabel,
                   style: const TextStyle(
                     color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],

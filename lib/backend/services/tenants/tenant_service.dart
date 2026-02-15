@@ -68,10 +68,12 @@ class TenantService {
               final propertyId = propertyDoc.id;
               final propertyData = propertyDoc.data();
               final propertyNameValue = propertyData['propertyName'];
+              final propertyRentValue = propertyData['rentAmount'];
               final propertyName =
                   propertyNameValue is String && propertyNameValue.trim().isNotEmpty
                   ? propertyNameValue.trim()
                   : 'Unknown property';
+              final propertyRentAmount = _asDouble(propertyRentValue);
 
               tenantSubs[propertyId] = propertyDoc.reference
                   .collection('tenants')
@@ -83,6 +85,7 @@ class TenantService {
                             (doc) => TenantModel.fromFirestore(
                               doc,
                               propertyName: propertyName,
+                              rentAmount: propertyRentAmount,
                             ),
                           )
                           .toList();
@@ -102,6 +105,32 @@ class TenantService {
     );
 
     return controller.stream;
+  }
+
+  static double _asDouble(dynamic value) {
+    if (value is double) {
+      return value;
+    }
+    if (value is num) {
+      return value.toDouble();
+    }
+    if (value is String) {
+      return double.tryParse(value.trim()) ?? 0;
+    }
+    return 0;
+  }
+
+  static int _asInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+    if (value is num) {
+      return value.toInt();
+    }
+    if (value is String) {
+      return int.tryParse(value.trim()) ?? 0;
+    }
+    return 0;
   }
 
   Future<void> refreshCurrentUserTenants() async {
@@ -252,14 +281,34 @@ class TenantService {
     }
 
     final tenantRef = propertyRef.collection('tenants').doc(tenantUid);
-    final existingTenant = await tenantRef.get();
-    if (existingTenant.exists) {
-      throw ArgumentError('Tenant already exists in this property.');
-    }
 
-    await tenantRef.set({
-      'unitId': cleanedUnitId,
-      'createdAt': FieldValue.serverTimestamp(),
+    await _firestore.runTransaction((transaction) async {
+      final txPropertySnapshot = await transaction.get(propertyRef);
+      if (!txPropertySnapshot.exists) {
+        throw ArgumentError('Selected property was not found.');
+      }
+
+      final txPropertyData = txPropertySnapshot.data() ?? const <String, dynamic>{};
+      final occupied = _asInt(txPropertyData['occupied']);
+      final totalUnits = _asInt(txPropertyData['units']);
+
+      if (totalUnits <= 0) {
+        throw StateError('Property unit count is invalid.');
+      }
+      if (occupied >= totalUnits) {
+        throw ArgumentError('This property has no available units.');
+      }
+
+      final txTenantSnapshot = await transaction.get(tenantRef);
+      if (txTenantSnapshot.exists) {
+        throw ArgumentError('Tenant already exists in this property.');
+      }
+
+      transaction.set(tenantRef, {
+        'unitId': cleanedUnitId,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      transaction.update(propertyRef, {'occupied': occupied + 1});
     });
   }
 }
