@@ -1,138 +1,99 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
-class HomeScreen2 extends StatefulWidget {
+class HomeScreen2 extends StatelessWidget {
   const HomeScreen2({super.key});
 
   @override
-  State<HomeScreen2> createState() => _HomeScreenState2();
-}
-
-class _HomeScreenState2 extends State<HomeScreen2> {
-  static const int totalSeconds = 25 * 60;
-
-  int remainingSeconds = totalSeconds;
-  Timer? timer;
-  bool isRunning = false;
-
-  void startPause() {
-    if (isRunning) {
-      timer?.cancel();
-    } else {
-      timer = Timer.periodic(const Duration(seconds: 1), (activeTimer) {
-        if (remainingSeconds > 0) {
-          setState(() {
-            remainingSeconds--;
-          });
-        } else {
-          activeTimer.cancel();
-        }
-      });
-    }
-
-    setState(() {
-      isRunning = !isRunning;
-    });
-  }
-
-  void reset() {
-    timer?.cancel();
-    setState(() {
-      remainingSeconds = totalSeconds;
-      isRunning = false;
-    });
-  }
-
-  String formatTime(int seconds) {
-    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
-    final secs = (seconds % 60).toString().padLeft(2, '0');
-    return '$minutes:$secs';
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final progress = 1 - (remainingSeconds / totalSeconds);
-
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Tenant Timer',
-              style: TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            const SizedBox(height: 30),
-            Stack(
-              alignment: Alignment.center,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  width: 240,
-                  height: 240,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 12,
-                    backgroundColor: Colors.grey.shade700,
-                    valueColor: const AlwaysStoppedAnimation(Color(0xFFC77DFF)),
+                /// Icon
+                Container(
+                  padding: const EdgeInsets.all(25),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.apartment_rounded,
+                    size: 80,
+                    color: Colors.white,
                   ),
                 ),
-                Column(
-                  children: [
-                    const Text(
-                      'FOCUS',
-                      style: TextStyle(color: Color(0xFFC77DFF), fontSize: 14),
+
+                const SizedBox(height: 40),
+
+                /// Title
+                const Text(
+                  "Tenant Portal",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                /// Subtitle
+                const Text(
+                  "We’re building something amazing for you.\nStay tuned!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                ),
+
+                const SizedBox(height: 30),
+
+                /// Progress Indicator
+                const SizedBox(
+                  width: 120,
+                  child: LinearProgressIndicator(
+                    backgroundColor: Colors.white24,
+                    color: Colors.white,
+                    minHeight: 5,
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
+                /// Coming Soon Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.white70),
+                  ),
+                  child: const Text(
+                    "COMING SOON",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
                     ),
-                    Text(
-                      formatTime(remainingSeconds),
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 42,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 30),
-            FloatingActionButton(
-              backgroundColor: const Color.fromARGB(255, 255, 3, 3),
-              onPressed: startPause,
-              child: Icon(isRunning ? Icons.pause : Icons.play_arrow),
-            ),
-            const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: reset,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Reset'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade800,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.skip_next),
-                  label: const Text('Skip'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade800,
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    timer?.cancel();
-    super.dispose();
   }
 }

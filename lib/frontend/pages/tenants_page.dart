@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:arma2/backend/models/tenant_model.dart';
 import 'package:arma2/backend/services/tenants/tenant_service.dart';
 import 'package:arma2/frontend/pages/add_tenant_page.dart';
+import 'package:arma2/frontend/pages/tenant_settings_page.dart';
 
 class TenantsPage extends StatefulWidget {
   const TenantsPage({super.key});
@@ -33,6 +34,13 @@ class _TenantsPageState extends State<TenantsPage> {
     await Navigator.push<bool>(
       context,
       MaterialPageRoute(builder: (_) => const AddTenantPage()),
+    );
+  }
+
+  Future<void> _openTenantSettingsPage(TenantModel tenant) async {
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => TenantSettingsPage(tenant: tenant)),
     );
   }
 
@@ -111,7 +119,11 @@ class _TenantsPageState extends State<TenantsPage> {
                   itemCount: tenants.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
-                    return _TenantCard(data: tenants[index]);
+                    final tenant = tenants[index];
+                    return _TenantCard(
+                      data: tenant,
+                      onOpenSettings: () => _openTenantSettingsPage(tenant),
+                    );
                   },
                 );
               },
@@ -124,9 +136,10 @@ class _TenantsPageState extends State<TenantsPage> {
 }
 
 class _TenantCard extends StatelessWidget {
-  const _TenantCard({required this.data});
+  const _TenantCard({required this.data, required this.onOpenSettings});
 
   final TenantModel data;
+  final VoidCallback onOpenSettings;
 
   String _displayName(String name, String email) {
     final cleanedName = name.trim();
@@ -142,8 +155,8 @@ class _TenantCard extends StatelessWidget {
       }
     }
 
-    if (data.id.length >= 6) {
-      return 'Tenant ${data.id.substring(0, 6)}';
+    if (data.tenantUid.length >= 6) {
+      return 'Tenant ${data.tenantUid.substring(0, 6)}';
     }
     return 'Tenant';
   }
@@ -177,8 +190,14 @@ class _TenantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tenantDocId = data.tenantUid.trim();
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(data.id).snapshots(),
+      stream: tenantDocId.isEmpty
+          ? null
+          : FirebaseFirestore.instance
+                .collection('users')
+                .doc(tenantDocId)
+                .snapshots(),
       builder: (context, snapshot) {
         final userData = snapshot.data?.data();
         final tenantName = userData?['name'] is String
@@ -251,9 +270,12 @@ class _TenantCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: Color.fromARGB(255, 155, 155, 155),
+                    IconButton(
+                      onPressed: onOpenSettings,
+                      icon: const Icon(
+                        Icons.chevron_right,
+                        color: Color.fromARGB(255, 155, 155, 155),
+                      ),
                     ),
                   ],
                 ),
