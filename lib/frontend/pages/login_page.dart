@@ -6,7 +6,7 @@ import 'package:arma2/backend/services/auth/user_role_service.dart';
 import 'package:arma2/backend/services/messaging_service.dart';
 import 'package:arma2/frontend/pages/forgot_password_page.dart';
 import 'package:arma2/frontend/pages/OwnerHomeRun.dart';
-import 'package:arma2/frontend/pages/Tenant_home_page.dart';
+import 'package:arma2/frontend/pages/TenantHomeRun.dart';
 import 'package:arma2/frontend/pages/signup_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -78,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
       if (role == 'tenant') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen2()),
+          MaterialPageRoute(builder: (_) => const TenantHomeRun()),
         );
         return;
       }

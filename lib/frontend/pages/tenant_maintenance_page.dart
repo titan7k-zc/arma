@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class TenantHomePage extends StatelessWidget {
-  const TenantHomePage({super.key});
+class TenantMaintenancePage extends StatelessWidget {
+  const TenantMaintenancePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +21,10 @@ class TenantHomePage extends StatelessWidget {
             child: const Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.home_outlined, size: 44, color: Colors.black87),
+                Icon(Icons.build_outlined, size: 44, color: Colors.black87),
                 SizedBox(height: 12),
                 Text(
-                  'Tenant Home',
+                  'Maintanance',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 22,
@@ -33,7 +33,7 @@ class TenantHomePage extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Home dashboard content can be added here.',
+                  'Maintenance requests and updates will be shown here.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Color.fromARGB(255, 102, 102, 102),

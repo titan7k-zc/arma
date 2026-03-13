@@ -32,6 +32,7 @@ class AuthService {
     required String address,
     required String nicNumber,
     required String mobileNumber,
+    required String phonew,
     required String role,
   }) async {
     await _signUpService.signUpWithProfile(
