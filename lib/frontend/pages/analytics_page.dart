@@ -54,10 +54,7 @@ class AnalyticsPage extends StatelessWidget {
             0,
             (sum, property) => sum + property.occupied,
           );
-          final vacantUnits = (totalUnits - occupiedUnits).clamp(
-            0,
-            totalUnits,
-          ) as int;
+          final vacantUnits = (totalUnits - occupiedUnits).clamp(0, totalUnits);
           final occupancyRate = totalUnits <= 0
               ? 0.0
               : (occupiedUnits / totalUnits) * 100;
@@ -135,10 +132,9 @@ class AnalyticsPage extends StatelessWidget {
                               final safeUnits = property.units <= 0
                                   ? 1
                                   : property.units;
-                              final ratio =
-                                  (property.occupied / safeUnits)
-                                      .clamp(0.0, 1.0)
-                                      .toDouble();
+                              final ratio = (property.occupied / safeUnits)
+                                  .clamp(0.0, 1.0)
+                                  .toDouble();
                               return _PropertyProgressTile(
                                 title: property.propertyName.trim().isEmpty
                                     ? 'Untitled property'
