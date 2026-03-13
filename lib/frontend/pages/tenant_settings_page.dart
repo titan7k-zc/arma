@@ -135,7 +135,9 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _formatValue(dynamic value) {
@@ -168,12 +170,12 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
       return key;
     }
 
-    final withSpaces = key
-        .replaceAll('_', ' ')
-        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (match) {
-          return '${match.group(1)} ${match.group(2)}';
-        })
-        .trim();
+    final withSpaces = key.replaceAll('_', ' ').replaceAllMapped(
+      RegExp(r'([a-z])([A-Z])'),
+      (match) {
+        return '${match.group(1)} ${match.group(2)}';
+      },
+    ).trim();
     return withSpaces.isEmpty
         ? key
         : '${withSpaces[0].toUpperCase()}${withSpaces.substring(1)}';
@@ -243,7 +245,10 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
     final tenantUid = widget.tenant.tenantUid.trim();
     final userDocStream = tenantUid.isEmpty
         ? null
-        : FirebaseFirestore.instance.collection('users').doc(tenantUid).snapshots();
+        : FirebaseFirestore.instance
+              .collection('users')
+              .doc(tenantUid)
+              .snapshots();
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 244, 244, 244),
@@ -277,7 +282,8 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
                 );
               }
 
-              final properties = propertySnapshot.data ?? const <PropertyModel>[];
+              final properties =
+                  propertySnapshot.data ?? const <PropertyModel>[];
               final hasSelectedProperty = properties.any(
                 (property) => property.id == _selectedPropertyId,
               );
@@ -299,7 +305,8 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
                   children: [
                     _buildSection(
                       title: 'Tenant User Data',
-                      children: userSnapshot.connectionState ==
+                      children:
+                          userSnapshot.connectionState ==
                               ConnectionState.waiting
                           ? const [Center(child: CircularProgressIndicator())]
                           : sortedEntries.isEmpty
@@ -322,7 +329,9 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
                       title: 'Change Property / Unit',
                       children: [
                         DropdownButtonFormField<String>(
-                          value: hasSelectedProperty ? _selectedPropertyId : null,
+                          initialValue: hasSelectedProperty
+                              ? _selectedPropertyId
+                              : null,
                           items: properties
                               .map(
                                 (property) => DropdownMenuItem<String>(
@@ -333,7 +342,8 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
                               .toList(),
                           onChanged: properties.isEmpty
                               ? null
-                              : (value) => setState(() => _selectedPropertyId = value),
+                              : (value) =>
+                                    setState(() => _selectedPropertyId = value),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Required';
@@ -343,7 +353,9 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
                           decoration: InputDecoration(
                             labelText: 'Property',
                             labelStyle: const TextStyle(color: Colors.black87),
-                            floatingLabelStyle: const TextStyle(color: Colors.black),
+                            floatingLabelStyle: const TextStyle(
+                              color: Colors.black,
+                            ),
                             filled: true,
                             fillColor: Colors.white,
                             enabledBorder: OutlineInputBorder(
@@ -375,7 +387,9 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
                           decoration: InputDecoration(
                             labelText: 'Unit ID',
                             labelStyle: const TextStyle(color: Colors.black87),
-                            floatingLabelStyle: const TextStyle(color: Colors.black),
+                            floatingLabelStyle: const TextStyle(
+                              color: Colors.black,
+                            ),
                             filled: true,
                             fillColor: Colors.white,
                             enabledBorder: OutlineInputBorder(
@@ -397,7 +411,8 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: _isSaving || _isRemoving || properties.isEmpty
+                            onPressed:
+                                _isSaving || _isRemoving || properties.isEmpty
                                 ? null
                                 : () => _saveAssignment(properties),
                             style: ElevatedButton.styleFrom(
@@ -436,9 +451,16 @@ class _TenantSettingsPageState extends State<TenantSettingsPage> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: _isSaving || _isRemoving ? null : _removeTenant,
+                            onPressed: _isSaving || _isRemoving
+                                ? null
+                                : _removeTenant,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(255, 173, 27, 27),
+                              backgroundColor: const Color.fromARGB(
+                                255,
+                                173,
+                                27,
+                                27,
+                              ),
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(

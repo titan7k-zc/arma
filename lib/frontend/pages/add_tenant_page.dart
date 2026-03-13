@@ -29,9 +29,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
 
     final selectedPropertyId = _selectedPropertyId;
     if (selectedPropertyId == null || selectedPropertyId.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a property')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a property')));
       return;
     }
 
@@ -57,9 +57,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $error')));
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -139,7 +139,9 @@ class _AddTenantPageState extends State<AddTenantPage> {
                       if (text.isEmpty) {
                         return 'Required';
                       }
-                      final emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+                      final emailPattern = RegExp(
+                        r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                      );
                       if (!emailPattern.hasMatch(text)) {
                         return 'Enter a valid email';
                       }
@@ -184,7 +186,7 @@ class _AddTenantPageState extends State<AddTenantPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: selectedPropertyId,
+        initialValue: selectedPropertyId,
         items: properties
             .map(
               (property) => DropdownMenuItem<String>(

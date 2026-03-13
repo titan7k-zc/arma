@@ -5,7 +5,7 @@ import 'package:arma2/backend/services/auth/session_service.dart';
 import 'package:arma2/backend/services/auth/user_role_service.dart';
 import 'package:arma2/backend/services/messaging_service.dart';
 import 'package:arma2/frontend/pages/forgot_password_page.dart';
-import 'package:arma2/frontend/pages/Owner_home_page.dart';
+import 'package:arma2/frontend/pages/OwnerHomeRun.dart';
 import 'package:arma2/frontend/pages/Tenant_home_page.dart';
 import 'package:arma2/frontend/pages/signup_page.dart';
 
@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
       if (role == 'owner') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const HomePage()),
+          MaterialPageRoute(builder: (_) => const OwnerHomeRun()),
         );
         return;
       }
