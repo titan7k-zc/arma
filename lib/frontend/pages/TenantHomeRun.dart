@@ -231,19 +231,6 @@ class _TenantHomeRunState extends State<TenantHomeRun> {
     );
   }
 
-  String get _appBarTitle {
-    switch (_selectedIndex) {
-      case 0:
-        return 'Home';
-      case 1:
-        return 'Payments';
-      case 2:
-        return 'Maintanance';
-      default:
-        return 'Home';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -253,7 +240,7 @@ class _TenantHomeRunState extends State<TenantHomeRun> {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        title: Text(_appBarTitle),
+        title: const Text('Arma'),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none),
