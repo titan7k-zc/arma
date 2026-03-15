@@ -18,6 +18,13 @@ class _TenantPaymentsPageState extends State<TenantPaymentsPage> {
       return;
     }
 
+    final shouldPay = await _showPaymentConfirmationDialog(
+      amountLabel: _formatCurrency(lease.rentAmount),
+    );
+    if (!shouldPay) {
+      return;
+    }
+
     setState(() => _isPaying = true);
 
     try {
@@ -72,6 +79,32 @@ class _TenantPaymentsPageState extends State<TenantPaymentsPage> {
     ];
 
     return '${months[value.month - 1]} ${value.day}, ${value.year}';
+  }
+
+  Future<bool> _showPaymentConfirmationDialog({
+    required String amountLabel,
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirm Payment'),
+          content: Text('Do you want to pay $amountLabel now?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+
+    return result ?? false;
   }
 
   int _onTimePercentage(List<TenantPaymentRecord> payments) {

@@ -126,7 +126,7 @@ class TenantNotificationsPage extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            _formatDate(request.createdAt),
+                            _formatDate(request.updatedAt ?? request.createdAt),
                             style: const TextStyle(
                               color: Color.fromARGB(255, 130, 130, 130),
                               fontSize: 12,
@@ -164,6 +164,28 @@ class TenantNotificationsPage extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
+                    if (request.ownerMessage.trim().isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 244, 248, 255),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 224, 233, 247),
+                          ),
+                        ),
+                        child: Text(
+                          'Owner Message: ${request.ownerMessage.trim()}',
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 63, 82, 119),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               );

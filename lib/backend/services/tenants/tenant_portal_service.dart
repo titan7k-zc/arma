@@ -54,13 +54,19 @@ class TenantMaintenanceRequestRecord {
     required this.id,
     required this.message,
     required this.status,
+    required this.ownerMessage,
+    required this.ownerMessageUpdatedAt,
     required this.createdAt,
+    required this.updatedAt,
   });
 
   final String id;
   final String message;
   final String status;
+  final String ownerMessage;
+  final DateTime? ownerMessageUpdatedAt;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
 }
 
 class TenantPortalService {
@@ -166,17 +172,22 @@ class TenantPortalService {
           .map((snapshot) {
             final requests = snapshot.docs.map((doc) {
               final data = doc.data();
+              final createdAt = _asDateTime(data['createdAt']);
+              final updatedAt = _asDateTime(data['updatedAt']);
               return TenantMaintenanceRequestRecord(
                 id: doc.id,
                 message: _asString(data['message']).trim(),
                 status: MaintenanceRequestStatus.normalize(_asString(data['status'])),
-                createdAt: _asDateTime(data['createdAt']),
+                ownerMessage: _asString(data['ownerMessage']).trim(),
+                ownerMessageUpdatedAt: _asDateTime(data['ownerMessageUpdatedAt']),
+                createdAt: createdAt,
+                updatedAt: updatedAt ?? createdAt,
               );
             }).toList();
 
             requests.sort((a, b) {
-              final aMillis = a.createdAt?.millisecondsSinceEpoch ?? 0;
-              final bMillis = b.createdAt?.millisecondsSinceEpoch ?? 0;
+              final aMillis = (a.updatedAt ?? a.createdAt)?.millisecondsSinceEpoch ?? 0;
+              final bMillis = (b.updatedAt ?? b.createdAt)?.millisecondsSinceEpoch ?? 0;
               return bMillis.compareTo(aMillis);
             });
 
@@ -214,6 +225,9 @@ class TenantPortalService {
         'status': 'paid',
         'paidAt': FieldValue.serverTimestamp(),
         'dueAt': Timestamp.fromDate(lease.nextDueAt),
+        'propertyName': lease.propertyName,
+        'tenantDisplayName': user.displayName?.trim() ?? '',
+        'tenantEmail': user.email?.trim() ?? '',
         'createdAt': FieldValue.serverTimestamp(),
       });
 

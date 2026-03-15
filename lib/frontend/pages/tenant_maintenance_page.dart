@@ -194,7 +194,8 @@ class _TenantMaintenancePageState extends State<TenantMaintenancePage> {
                         child: _RequestCard(
                           message: request.message,
                           status: request.status,
-                          dateLabel: _formatDate(request.createdAt),
+                          ownerMessage: request.ownerMessage,
+                          dateLabel: _formatDate(request.updatedAt ?? request.createdAt),
                         ),
                       );
                     }).toList(),
@@ -387,11 +388,13 @@ class _RequestCard extends StatelessWidget {
   const _RequestCard({
     required this.message,
     required this.status,
+    required this.ownerMessage,
     required this.dateLabel,
   });
 
   final String message;
   final String status;
+  final String ownerMessage;
   final String dateLabel;
 
   @override
@@ -445,6 +448,26 @@ class _RequestCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
+          if (ownerMessage.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 244, 248, 255),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color.fromARGB(255, 224, 233, 247)),
+              ),
+              child: Text(
+                'Owner Message: ${ownerMessage.trim()}',
+                style: const TextStyle(
+                  color: Color.fromARGB(255, 63, 82, 119),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
