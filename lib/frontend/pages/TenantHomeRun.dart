@@ -4,6 +4,7 @@ import 'package:arma2/backend/services/auth/session_service.dart';
 import 'package:arma2/frontend/pages/login_page.dart';
 import 'package:arma2/frontend/pages/Tenant_home_page.dart';
 import 'package:arma2/frontend/pages/tenant_maintenance_page.dart';
+import 'package:arma2/frontend/pages/tenant_notifications_page.dart';
 import 'package:arma2/frontend/pages/tenant_payments_page.dart';
 
 class TenantHomeRun extends StatefulWidget {
@@ -101,6 +102,13 @@ class _TenantHomeRunState extends State<TenantHomeRun> {
         context,
       ).showSnackBar(SnackBar(content: Text('Logout failed: $error')));
     }
+  }
+
+  Future<void> _openNotificationsPage() async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(builder: (_) => const TenantNotificationsPage()),
+    );
   }
 
   Widget _buildAccountDrawer() {
@@ -244,7 +252,7 @@ class _TenantHomeRunState extends State<TenantHomeRun> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            onPressed: _openNotificationsPage,
           ),
           Padding(
             padding: const EdgeInsets.only(right: 16),

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:arma2/backend/models/maintenance_request_status.dart';
+
 class TenantLeaseInfo {
   const TenantLeaseInfo({
     required this.ownerId,
@@ -167,9 +169,7 @@ class TenantPortalService {
               return TenantMaintenanceRequestRecord(
                 id: doc.id,
                 message: _asString(data['message']).trim(),
-                status: _asString(data['status']).trim().isEmpty
-                    ? 'open'
-                    : _asString(data['status']).trim(),
+                status: MaintenanceRequestStatus.normalize(_asString(data['status'])),
                 createdAt: _asDateTime(data['createdAt']),
               );
             }).toList();
@@ -251,10 +251,13 @@ class TenantPortalService {
       'assignmentId': lease.assignmentId,
       'unitId': lease.unitId,
       'propertyName': lease.propertyName,
+      'tenantDisplayName': user.displayName?.trim() ?? '',
+      'tenantEmail': user.email?.trim() ?? '',
       'message': cleanedMessage,
-      'status': 'open',
+      'status': MaintenanceRequestStatus.pending,
       'priority': isEmergency ? 'high' : 'normal',
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 

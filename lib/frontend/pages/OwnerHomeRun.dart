@@ -6,6 +6,7 @@ import 'package:arma2/backend/services/tenants/tenant_service.dart';
 import 'package:arma2/frontend/pages/analytics_page.dart';
 import 'package:arma2/frontend/pages/login_page.dart';
 import 'package:arma2/frontend/pages/Owner_home_page.dart';
+import 'package:arma2/frontend/pages/owner_notifications_page.dart';
 import 'package:arma2/frontend/pages/properties_page.dart';
 import 'package:arma2/frontend/pages/tenants_page.dart';
 
@@ -140,6 +141,13 @@ class _OwnerHomeRunState extends State<OwnerHomeRun> {
         context,
       ).showSnackBar(SnackBar(content: Text('Logout failed: $error')));
     }
+  }
+
+  Future<void> _openNotificationsPage() async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(builder: (_) => const OwnerNotificationsPage()),
+    );
   }
 
   Widget _buildAccountDrawer() {
@@ -297,7 +305,7 @@ class _OwnerHomeRunState extends State<OwnerHomeRun> {
             ),
           IconButton(
             icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            onPressed: _openNotificationsPage,
           ),
           Padding(
             padding: const EdgeInsets.only(right: 16),

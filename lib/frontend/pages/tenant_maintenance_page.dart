@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:arma2/backend/models/maintenance_request_status.dart';
 import 'package:arma2/backend/services/tenants/tenant_portal_service.dart';
 
 class TenantMaintenancePage extends StatefulWidget {
@@ -395,8 +396,8 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusLower = status.toLowerCase();
-    final isOpen = statusLower == 'open';
+    final normalizedStatus = MaintenanceRequestStatus.normalize(status);
+    final palette = _statusPalette(normalizedStatus);
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -421,19 +422,13 @@ class _RequestCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: isOpen
-                      ? const Color.fromARGB(255, 255, 243, 221)
-                      : const Color.fromARGB(255, 221, 246, 231),
+                  color: palette.background,
                   borderRadius: BorderRadius.circular(99),
                 ),
                 child: Text(
-                  statusLower.isEmpty
-                      ? 'open'
-                      : '${statusLower[0].toUpperCase()}${statusLower.substring(1)}',
+                  normalizedStatus,
                   style: TextStyle(
-                    color: isOpen
-                        ? const Color.fromARGB(255, 176, 117, 23)
-                        : const Color.fromARGB(255, 46, 164, 99),
+                    color: palette.foreground,
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
                   ),
@@ -453,6 +448,37 @@ class _RequestCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  _StatusPalette _statusPalette(String normalizedStatus) {
+    switch (normalizedStatus) {
+      case MaintenanceRequestStatus.inProgress:
+        return const _StatusPalette(
+          background: Color.fromARGB(255, 228, 239, 255),
+          foreground: Color.fromARGB(255, 52, 96, 188),
+        );
+      case MaintenanceRequestStatus.onHold:
+        return const _StatusPalette(
+          background: Color.fromARGB(255, 244, 236, 255),
+          foreground: Color.fromARGB(255, 126, 72, 189),
+        );
+      case MaintenanceRequestStatus.completed:
+        return const _StatusPalette(
+          background: Color.fromARGB(255, 221, 246, 231),
+          foreground: Color.fromARGB(255, 46, 164, 99),
+        );
+      case MaintenanceRequestStatus.rejected:
+        return const _StatusPalette(
+          background: Color.fromARGB(255, 255, 232, 232),
+          foreground: Color.fromARGB(255, 178, 54, 54),
+        );
+      case MaintenanceRequestStatus.pending:
+      default:
+        return const _StatusPalette(
+          background: Color.fromARGB(255, 255, 243, 221),
+          foreground: Color.fromARGB(255, 176, 117, 23),
+        );
+    }
   }
 }
 
@@ -476,4 +502,11 @@ class _EmptyRequestsCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _StatusPalette {
+  const _StatusPalette({required this.background, required this.foreground});
+
+  final Color background;
+  final Color foreground;
 }
