@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "283537177115",
-    "project_id": "arma-ee5d3",
-    "storage_bucket": "arma-ee5d3.firebasestorage.app"
+    "project_number": "115435241426",
+    "project_id": "arma1001-9ceb1",
+    "storage_bucket": "arma1001-9ceb1.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:283537177115:android:f827ea6e6605ee471456be",
+        "mobilesdk_app_id": "1:115435241426:android:9d28b93154c7d071db520b",
         "android_client_info": {
           "package_name": "com.zerocrow.arma"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBDI0vKcd5NR47abNvl1bwroAw8-kIIDEc"
+          "current_key": "AIzaSyCBlxksUMuv5sIe7g3Oc8QBAVejTDaCGAI"
         }
       ],
       "services": {
