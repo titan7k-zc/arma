@@ -29,6 +29,18 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   String _message = '';
 
+  String _mapLoginError(Object error) {
+    final raw = error.toString().toLowerCase();
+
+    if (raw.contains('chain validation failed') ||
+        raw.contains('network-request-failed') ||
+        raw.contains('an internal error has occurred')) {
+      return 'Secure connection failed. Turn ON automatic date/time and disable VPN or proxy, then try again.';
+    }
+
+    return 'Login failed. Please try again.';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -94,14 +106,20 @@ class _LoginPageState extends State<LoginPage> {
           _message = 'User not found.';
         } else if (error.code == 'wrong-password') {
           _message = 'Wrong password.';
+        } else if (error.code == 'invalid-email') {
+          _message = 'Invalid email address.';
+        } else if (error.code == 'invalid-credential') {
+          _message = 'Invalid email or password.';
+        } else if (error.code == 'too-many-requests') {
+          _message = 'Too many attempts. Please wait and try again.';
         } else {
-          _message = error.message ?? 'Login failed.';
+          _message = _mapLoginError(error);
         }
       });
-    } catch (_) {
+    } catch (error) {
       setState(() {
         _isLoading = false;
-        _message = 'Something went wrong.';
+        _message = _mapLoginError(error);
       });
     }
   }

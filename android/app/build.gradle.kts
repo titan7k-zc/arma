@@ -7,6 +7,7 @@ plugins {
 }
 
 dependencies {
+    implementation("com.google.android.gms:play-services-base:18.5.0")
     implementation("com.google.firebase:firebase-messaging:23.4.1")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

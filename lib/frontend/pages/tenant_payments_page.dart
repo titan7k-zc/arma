@@ -13,6 +13,15 @@ class _TenantPaymentsPageState extends State<TenantPaymentsPage> {
   final TenantPortalService _portalService = TenantPortalService.instance;
   bool _isPaying = false;
 
+  String _paymentErrorMessage(Object error) {
+    final raw = error.toString().toLowerCase();
+    if (raw.contains('chain validation failed') ||
+        raw.contains('an internal error has occurred')) {
+      return 'Payment failed. Check internet and phone time, then try again.';
+    }
+    return 'Payment failed: $error';
+  }
+
   Future<void> _payRent(TenantLeaseInfo lease) async {
     if (_isPaying) {
       return;
@@ -41,7 +50,7 @@ class _TenantPaymentsPageState extends State<TenantPaymentsPage> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Payment failed: $error')));
+      ).showSnackBar(SnackBar(content: Text(_paymentErrorMessage(error))));
     } finally {
       if (mounted) {
         setState(() => _isPaying = false);

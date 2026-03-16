@@ -211,31 +211,80 @@ class TenantPortalService {
     final assignmentRef = _assignmentRef(lease);
     final paymentsRef = assignmentRef.collection('payments').doc();
 
-    final nextDueAfterPayment = _nextMonthSameDay(lease.nextDueAt);
+    final now = DateTime.now();
+    final nextDueAt = lease.nextDueAt;
+    final dueCycleCount = _dueCycleCount(nextDueAt: nextDueAt, now: now);
+    final amountToPay = lease.rentAmount;
+    final monthlyRentAmount = dueCycleCount < 1
+        ? lease.rentAmount
+        : amountToPay / dueCycleCount;
+    final coveredMonthKeys = _coveredMonthKeys(
+      startDueAt: nextDueAt,
+      cycleCount: dueCycleCount,
+    );
+    final coveredMonthLabels = _coveredMonthLabels(
+      startDueAt: nextDueAt,
+      cycleCount: dueCycleCount,
+    );
+    final nextDueAfterPayment = _addMonthsSameDay(
+      date: nextDueAt,
+      monthCount: dueCycleCount,
+    );
 
-    await _firestore.runTransaction((transaction) async {
-      transaction.set(paymentsRef, {
+    final paymentPayload = <String, dynamic>{
+      'tenantUid': user.uid,
+      'propertyId': lease.propertyId,
+      'ownerId': lease.ownerId,
+      'assignmentId': lease.assignmentId,
+      'unitId': lease.unitId,
+      'amount': amountToPay,
+      'monthlyRentAmount': monthlyRentAmount,
+      'coveredCycleCount': dueCycleCount,
+      'coveredMonthKeys': coveredMonthKeys,
+      'coveredMonthLabels': coveredMonthLabels,
+      'method': method,
+      'status': 'paid',
+      'paidAt': FieldValue.serverTimestamp(),
+      'dueAt': Timestamp.fromDate(nextDueAt),
+      'propertyName': lease.propertyName,
+      'tenantDisplayName': user.displayName?.trim() ?? '',
+      'tenantEmail': user.email?.trim() ?? '',
+      'createdAt': FieldValue.serverTimestamp(),
+    };
+
+    final assignmentPayload = <String, dynamic>{
+      'nextDueAt': Timestamp.fromDate(nextDueAfterPayment),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        transaction.set(paymentsRef, paymentPayload);
+        transaction.set(assignmentRef, assignmentPayload, SetOptions(merge: true));
+      });
+    } on FirebaseException {
+      final legacyPaymentPayload = <String, dynamic>{
         'tenantUid': user.uid,
         'propertyId': lease.propertyId,
         'ownerId': lease.ownerId,
         'assignmentId': lease.assignmentId,
         'unitId': lease.unitId,
-        'amount': lease.rentAmount,
+        'amount': amountToPay,
         'method': method,
         'status': 'paid',
         'paidAt': FieldValue.serverTimestamp(),
-        'dueAt': Timestamp.fromDate(lease.nextDueAt),
+        'dueAt': Timestamp.fromDate(nextDueAt),
         'propertyName': lease.propertyName,
         'tenantDisplayName': user.displayName?.trim() ?? '',
         'tenantEmail': user.email?.trim() ?? '',
         'createdAt': FieldValue.serverTimestamp(),
-      });
+      };
 
-      transaction.set(assignmentRef, {
-        'nextDueAt': Timestamp.fromDate(nextDueAfterPayment),
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-    });
+      await _firestore.runTransaction((transaction) async {
+        transaction.set(paymentsRef, legacyPaymentPayload);
+        transaction.set(assignmentRef, assignmentPayload, SetOptions(merge: true));
+      });
+    }
   }
 
   Future<void> submitMaintenanceRequest({
@@ -378,16 +427,18 @@ class TenantPortalService {
 
     final dueDay = _resolveDueDay(assignmentData, propertyData);
     final explicitNextDueAt = _asDateTime(assignmentData['nextDueAt']);
-    final calculatedNextDueAt = _nextDueDate(now: now, dueDay: dueDay);
-    final nextDueAt =
-        explicitNextDueAt != null &&
-            !_startOfDay(explicitNextDueAt).isBefore(_startOfDay(now))
-        ? explicitNextDueAt
-        : calculatedNextDueAt;
+    final inferredNextDueAt = _dueDateOnOrAfter(
+      reference: leaseStart ?? createdAt ?? now,
+      dueDay: dueDay,
+    );
+    final nextDueAt = explicitNextDueAt ?? inferredNextDueAt;
+    final dueCycleCount = _dueCycleCount(nextDueAt: nextDueAt, now: now);
+    final dueRentAmount = rentAmount * dueCycleCount;
 
-    final daysUntilCurrentDue = _startOfDay(nextDueAt)
+    final rawDaysUntilDue = _startOfDay(nextDueAt)
         .difference(_startOfDay(now))
         .inDays;
+    final daysUntilCurrentDue = rawDaysUntilDue < 0 ? 0 : rawDaysUntilDue;
 
     return TenantLeaseInfo(
       ownerId: ownerId,
@@ -396,7 +447,7 @@ class TenantPortalService {
       propertyName: propertyName,
       address: address,
       unitId: unitId,
-      rentAmount: rentAmount,
+      rentAmount: dueRentAmount,
       leaseProgress: leaseProgress,
       daysUntilCurrentDue: daysUntilCurrentDue,
       nextDueAt: nextDueAt,
@@ -476,13 +527,89 @@ class TenantPortalService {
     return DateTime(now.year, now.month, clampedDay);
   }
 
-  static DateTime _nextDueDate({required DateTime now, required int dueDay}) {
-    final currentCycleDue = _currentCycleDueDate(now: now, dueDay: dueDay);
-    if (_startOfDay(currentCycleDue).isAfter(_startOfDay(now))) {
-      return currentCycleDue;
+  static DateTime _dueDateOnOrAfter({required DateTime reference, required int dueDay}) {
+    final cycleDue = _currentCycleDueDate(now: reference, dueDay: dueDay);
+    if (!_startOfDay(cycleDue).isBefore(_startOfDay(reference))) {
+      return cycleDue;
+    }
+    return _nextMonthSameDay(cycleDue);
+  }
+
+  static int _dueCycleCount({required DateTime nextDueAt, required DateTime now}) {
+    final startDue = _startOfDay(nextDueAt);
+    final today = _startOfDay(now);
+
+    if (startDue.isAfter(today)) {
+      return 1;
     }
 
-    return DateTime(now.year, now.month + 1, dueDay.clamp(1, 28) as int);
+    var count = 0;
+    var cursor = startDue;
+    while (!cursor.isAfter(today)) {
+      count++;
+      cursor = _nextMonthSameDay(cursor);
+    }
+    return count < 1 ? 1 : count;
+  }
+
+  static DateTime _addMonthsSameDay({
+    required DateTime date,
+    required int monthCount,
+  }) {
+    var result = _startOfDay(date);
+    final safeMonthCount = monthCount < 0 ? 0 : monthCount;
+    for (var index = 0; index < safeMonthCount; index++) {
+      result = _nextMonthSameDay(result);
+    }
+    return result;
+  }
+
+  static List<String> _coveredMonthKeys({
+    required DateTime startDueAt,
+    required int cycleCount,
+  }) {
+    final keys = <String>[];
+    var cursor = _startOfDay(startDueAt);
+    final safeCycleCount = cycleCount < 1 ? 1 : cycleCount;
+
+    for (var index = 0; index < safeCycleCount; index++) {
+      final month = cursor.month.toString().padLeft(2, '0');
+      keys.add('${cursor.year}-$month');
+      cursor = _nextMonthSameDay(cursor);
+    }
+
+    return keys;
+  }
+
+  static List<String> _coveredMonthLabels({
+    required DateTime startDueAt,
+    required int cycleCount,
+  }) {
+    const monthNames = <String>[
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    final labels = <String>[];
+    var cursor = _startOfDay(startDueAt);
+    final safeCycleCount = cycleCount < 1 ? 1 : cycleCount;
+
+    for (var index = 0; index < safeCycleCount; index++) {
+      labels.add('${monthNames[cursor.month - 1]} ${cursor.year}');
+      cursor = _nextMonthSameDay(cursor);
+    }
+
+    return labels;
   }
 
   static DateTime _nextMonthSameDay(DateTime date) {
